@@ -1,0 +1,74 @@
+%author: chung.tranduc89@gmail.com
+%matlab code
+%reverse the graph with black line
+%input: image name with extension, plot limits: xmin, ymin, xmax, ymax
+%output: x, y array with values
+
+clc;
+clear all;
+input_file = 'original_crop_partial_filter_1.bmp';
+x_min = 700;    %[nm]
+x_min = 0.7;    %[um]
+x_max = 1700;   %[nm]
+x_max = 1.700;  %[um]
+y_max = 5;      %[dB/km]
+
+im1 = imread(input_file);
+im2 = rgb2gray(im1);
+
+%filter cells with low intensity (depends on image and part of image we
+%want to reconstruct, the threshold should be chosen carefully
+min2 = min(min(im2));
+max2 = max(max(im2));
+threshold = min2;
+[m n] = size(im2);
+
+%threshold/filter image
+for i = 1:m
+    for j = 1:n
+        if im2(i,j) > threshold
+            im3(i,j) = 255;
+        else
+            im3(i,j) = im2(i,j);
+        end
+    end
+end
+
+%x, y axis
+x = zeros(1,n);
+y = zeros(1,n);
+
+%extract plot
+for i = 1:n
+    count = 0;
+    sum_count = 0;
+    x(1,i) = x_min + (x_max-x_min)/n*i;
+    %count black pixel
+    for j = 1:m
+        if (im3(j,i) == 0)
+            count = count + 1;
+            sum_count = sum_count + (m-j);
+        end
+    end
+    y(1,i) = y_max/m*sum_count/count;
+end
+
+%plot images
+figure(1)
+hFig = figure(1)
+set(hFig, 'Position', [0 0 100 100])
+imshow(im1);
+figure(2)
+hFig = figure(2)
+set(hFig, 'Position', [0 0 100 100])
+imshow(im2);
+figure(3)
+hFig = figure(3)
+set(hFig, 'Position', [0 0 100 100])
+imshow(im3);
+figure(4)
+hFig = figure(4)
+set(hFig, 'Position', [0 0 100 100])
+plot(x,y);
+xlim([x_min x_max]);
+grid on
